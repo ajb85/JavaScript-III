@@ -25,7 +25,8 @@ function GameObject(charAttrs) {
   this.dimensions = charAttrs.dimensions;
 }
 GameObject.prototype.destroy = function() {
-  return "Object was removed from the game";
+  this.name = this.name ? this.name : "Object";
+  return `${this.name} was removed from the game`;
 };
 /*
   === CharacterStats ===
@@ -62,6 +63,7 @@ Humanoid.prototype = Object.create(CharacterStats.prototype);
 Humanoid.prototype.greet = function() {
   return `${this.name} offers a greeting in ${this.language}.`;
 };
+
 /*
   * Inheritance chain: GameObject -> CharacterStats -> Humanoid
   * Instances of Humanoid should have all of the same properties as CharacterStats and GameObject.
@@ -127,3 +129,80 @@ console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
 // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.
 // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
 // * Create two new objects, one a villain and one a hero and fight it out with methods!
+
+function Hero(attrs) {
+  Humanoid.call(this, attrs);
+}
+Hero.prototype = Object.create(Humanoid.prototype);
+Hero.prototype.shieldBash = function(target, damage) {
+  if (this.weapons.includes("Shield")) {
+    target.healthPoints -= damage;
+    console.log(
+      `${this.name} did ${damage} damage to ${target.name} with Shield Bash`
+    );
+  } else {
+    console.log(
+      `${this.name} tried to Shield Bash but forgot he doesn't have a shield.`
+    );
+  }
+};
+Hero.prototype.slash = function(target, damage) {
+  // This would need to be updated to have a library of weapons that can use
+  // an attack then just check for the character's weapons for anything in
+  // the library.  But this is just a simple example....right? :P
+  if (this.weapons.includes("Sword") || this.weapons.includes("Dagger")) {
+    target.healthPoints -= damage;
+    console.log(
+      `${this.name} did ${damage} damage to ${target.name} with Slash`
+    );
+  } else {
+    console.log(
+      `${this.name} wanted to slash but didn't have the right weapon`
+    );
+  }
+};
+
+function Villain(attrs) {
+  Humanoid.call(this, attrs);
+}
+Villain.prototype = Object.create(Humanoid.prototype);
+
+const hero = new Hero({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 2,
+    height: 4
+  },
+  healthPoints: 10,
+  name: "Lord Beef Broth",
+  team: "Forest Kingdom",
+  weapons: ["Sword", "Shield"],
+  language: "Elvish"
+});
+const villain = new Villain({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 2,
+    height: 4
+  },
+  healthPoints: 10,
+  name: "Pancake Slapper",
+  team: "Castle Kingdom",
+  weapons: ["Sword", "Shield"],
+  language: "Elvish"
+});
+Villain.prototype.choke = function(target, damage) {
+  target.healthPoints -= damage;
+  console.log(`${this.name} did ${damage} damage to ${target.name} with Choke`);
+};
+Villain.prototype.shrink = function(target) {
+  target.dimensions.height = Math.floor(target.dimensions.height / 2);
+  console.log(`${this.name} shrunk ${target.name} to half his height!`);
+};
+
+hero.shieldBash(villain, 2);
+villain.choke(hero, 1);
+hero.slash(villain, 3);
+villain.shrink(hero);
